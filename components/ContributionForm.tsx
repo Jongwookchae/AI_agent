@@ -3,6 +3,30 @@
 import { useState } from "react";
 import type { CryptoType } from "@/lib/types";
 
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
+      isMetaMask?: boolean;
+    };
+  }
+}
+
+const BASE_SEPOLIA_CHAIN_ID = "0x14a34"; // 84532
+const FALLBACK_RECEIVER = "0x1111111111111111111111111111111111111111";
+
+function toWeiHex(amount: string): string {
+  const value = amount.trim();
+  if (!value || Number(value) <= 0) throw new Error("Please enter a valid amount.");
+
+  const [wholePart, fractionPart = ""] = value.split(".");
+  const whole = BigInt(wholePart || "0");
+  const fraction = (fractionPart + "0".repeat(18)).slice(0, 18);
+  const wei = whole * BigInt(10) ** BigInt(18) + BigInt(fraction || "0");
+  if (wei <= BigInt(0)) throw new Error("Amount is too small.");
+  return `0x${wei.toString(16)}`;
+}
+
 type Props = {
   wishId: string;
   cryptoType: CryptoType;
@@ -27,16 +51,77 @@ export default function ContributionForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  async function connectAndSendTestnetTx(amount: string): Promise<string> {
+    const provider = window.ethereum;
+    if (!provider) {
+      throw new Error("No wallet extension found. Install MetaMask or Base Wallet.");
+    }
+
+    const receiver =
+      process.env.NEXT_PUBLIC_TESTNET_RECEIVER_ADDRESS?.trim() || FALLBACK_RECEIVER;
+    if (!/^0x[a-fA-F0-9]{40}$/.test(receiver)) {
+      throw new Error("Invalid receiver address. Check NEXT_PUBLIC_TESTNET_RECEIVER_ADDRESS.");
+    }
+
+    const accounts = (await provider.request({
+      method: "eth_requestAccounts",
+    })) as string[];
+    const from = accounts?.[0];
+    if (!from) throw new Error("Wallet connection failed.");
+
+    try {
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+      });
+    } catch {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: BASE_SEPOLIA_CHAIN_ID,
+            chainName: "Base Sepolia",
+            nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+            rpcUrls: ["https://sepolia.base.org"],
+            blockExplorerUrls: ["https://sepolia.basescan.org"],
+          },
+        ],
+      });
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+      });
+    }
+
+    const value = toWeiHex(amount);
+    const txHash = (await provider.request({
+      method: "eth_sendTransaction",
+      params: [{ from, to: receiver, value }],
+    })) as string;
+
+    return txHash;
+  }
+
   const disabled = wishStatus !== "active";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
+      if (cryptoType !== "ETH" && cryptoType !== "BASE") {
+        throw new Error("Wallet payment is currently supported for ETH/BASE only.");
+      }
+
+      const txHash = await connectAndSendTestnetTx(form.amount);
+
       const res = await fetch(`/api/wishes/${wishId}/contributions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, amount: Number(form.amount) }),
+        body: JSON.stringify({
+          ...form,
+          amount: Number(form.amount),
+          txHash,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -44,9 +129,12 @@ export default function ContributionForm({
         return;
       }
       setForm({ contributorName: "", amount: "", message: "" });
+      alert("Payment successful on Base Sepolia testnet.");
       onSuccess();
-    } catch {
-      alert("Failed to submit funding.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to submit funding.";
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -71,7 +159,7 @@ export default function ContributionForm({
     >
       <h2 className="text-base font-bold text-white">💝 Fund This Wish</h2>
       <p className="text-xs text-slate-400">
-        * MVP — all contributions are mock data. No real transactions occur.
+        * Testnet payment enabled. Connect MetaMask/Base Wallet and pay on Base Sepolia.
       </p>
 
       <div>

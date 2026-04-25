@@ -23,7 +23,7 @@ export async function POST(
   }
 
   const body = await req.json();
-  const { contributorName, amount, message } = body;
+  const { contributorName, amount, message, txHash } = body;
 
   if (!contributorName || !amount) {
     return NextResponse.json({ error: "Contributor name and amount are required." }, { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(
     contributorName,
     amount: Number(amount),
     message: message ?? "",
+    txHash: typeof txHash === "string" ? txHash : undefined,
     createdAt: new Date().toISOString(),
   };
 

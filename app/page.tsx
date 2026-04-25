@@ -1,65 +1,70 @@
-import Image from "next/image";
+import WishForm from "@/components/WishForm";
+import Galaxy from "@/components/Galaxy";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="relative min-h-[calc(100vh-120px)] flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
+      <Galaxy
+        focal={[0.5, 0.5]}
+        rotation={[1.0, 0.0]}
+        starSpeed={0.5}
+        density={1}
+        hueShift={140}
+        speed={1.0}
+        mouseInteraction
+        glowIntensity={0.3}
+        saturation={0.0}
+        mouseRepulsion
+        repulsionStrength={2}
+        twinkleIntensity={0.3}
+        rotationSpeed={0.1}
+        autoCenterRepulsion={0}
+        transparent
+        className="pointer-events-none"
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(30,41,59,0.15),rgba(2,6,23,0.72)_60%,rgba(2,6,23,0.92)_100%)] pointer-events-none" />
+      <div className="relative z-10 min-h-[calc(100vh-120px)] w-full flex flex-col items-center justify-center">
+      {/* Hero */}
+      <div className="text-center mb-10 max-w-xl">
+        <div className="text-6xl mb-4">🧞‍♂️</div>
+        <h1 className="text-4xl font-extrabold text-white mb-3 leading-tight">
+          AI aGENIEnt
+        </h1>
+        <p className="text-xl text-violet-300 font-semibold mb-2">
+          Crypto Wish Funding Agent
+        </p>
+        <p className="text-slate-400 text-sm leading-relaxed">
+          Pick your favorite crypto, set a funding goal, and share the magic.
+          <br />
+          AI writes your share copy and tracks progress in real time.
+        </p>
+      </div>
+
+      {/* How it works */}
+      <div className="flex gap-6 mb-10 flex-wrap justify-center">
+        {[
+          { icon: "✍️", label: "Make a Wish" },
+          { icon: "🔗", label: "Share Link" },
+          { icon: "💝", label: "Friends Fund" },
+          { icon: "🎉", label: "Goal Reached" },
+        ].map((step) => (
+          <div key={step.label} className="flex flex-col items-center gap-1">
+            <span className="text-2xl">{step.icon}</span>
+            <span className="text-xs text-slate-400">{step.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Form card */}
+      <div className="w-full max-w-md bg-slate-900/80 backdrop-blur rounded-2xl p-6 border border-slate-700 shadow-2xl">
+        <h2 className="text-lg font-bold text-white mb-5">🌟 Make a Wish</h2>
+        <WishForm />
+      </div>
+
+      <p className="text-xs text-slate-600 mt-6">
+        * No real on-chain transactions occur in this MVP. All funding is mock data.
+      </p>
+      </div>
     </div>
   );
 }

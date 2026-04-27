@@ -1,26 +1,23 @@
 import WishForm from "@/components/WishForm";
-import Galaxy from "@/components/Galaxy";
+import Ribbons from "@/components/Ribbons";
 
 export default function HomePage() {
   return (
     <div className="relative min-h-[calc(100vh-120px)] flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
-      <Galaxy
-        focal={[0.5, 0.5]}
-        rotation={[1.0, 0.0]}
-        starSpeed={0.5}
-        density={1}
-        hueShift={140}
-        speed={1.0}
-        mouseInteraction
-        glowIntensity={0.3}
-        saturation={0.0}
-        mouseRepulsion
-        repulsionStrength={2}
-        twinkleIntensity={0.3}
-        rotationSpeed={0.1}
-        autoCenterRepulsion={0}
-        transparent
-        className="pointer-events-none"
+      <Ribbons
+        colors={["#8f7cff", "#f765b6", "#67d6ff"]}
+        baseSpring={0.03}
+        baseFriction={0.9}
+        baseThickness={22}
+        offsetFactor={0.05}
+        maxAge={500}
+        pointCount={42}
+        speedMultiplier={0.6}
+        enableFade={false}
+        enableShaderEffect={false}
+        effectAmplitude={2}
+        backgroundColor={[0, 0, 0, 0]}
+        className="absolute inset-0 pointer-events-none"
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(30,41,59,0.15),rgba(2,6,23,0.72)_60%,rgba(2,6,23,0.92)_100%)] pointer-events-none" />
       <div className="relative z-10 min-h-[calc(100vh-120px)] w-full flex flex-col items-center justify-center">
